@@ -16,3 +16,13 @@ data "azurerm_key_vault_secret" "db-password" {
   name         = "db-password"
   key_vault_id = data.azurerm_key_vault.kv.id
 }
+
+data "azurerm_key_vault_secret" "refresh-token-secret" {
+  name         = "refresh-token-secret"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}
+
+data "azurerm_key_vault_secret" "access-token-secret" {
+  name         = "access-token-secret"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}

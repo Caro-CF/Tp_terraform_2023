@@ -40,19 +40,18 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 
   app_settings = {
-
-    PORT                      = "3000"
-    DB_HOST                   = "postgres-db"
-    DB_USERNAME               = data.azurerm_key_vault_secret.db-username.value
+    PORT                      = var.port
+    DB_HOST                   = var.db_host
+    DB_USERNAME               = "${data.azurerm_key_vault_secret.db-username.value}@${azurerm_postgresql_server.srv-pgsql.name}"
     DB_PASSWORD               = data.azurerm_key_vault_secret.db-password.value
-    DB_DATABASE               = "postgres-db"
-    DB_DAILECT                = "postgres"
-    DB_PORT                   = "5432"
-    ACCESS_TOKEN_SECRET       = "accesstoken"
-    REFRESH_TOKEN_SECRET      = "refreshtoken"
-    ACCESS_TOKEN_EXPIRY       = "15m"
-    REFRESH_TOKEN_EXPIRY      = "7d"
-    REFRESH_TOKEN_COOKIE_NAME = "jid"
+    DB_DATABASE               = var.db_database
+    DB_DAILECT                = var.db_dailect
+    DB_PORT                   = var.db_port
+    ACCESS_TOKEN_SECRET       = data.azurerm_key_vault_secret.refresh-token-secret.value
+    REFRESH_TOKEN_SECRET      = data.azurerm_key_vault_secret.access-token-secret.value
+    ACCESS_TOKEN_EXPIRY       = var.access_token_expiry
+    REFRESH_TOKEN_EXPIRY      = var.refresh_token_expiry
+    REFRESH_TOKEN_COOKIE_NAME = var.refresh_token_cookie_name
   }
 }
 
@@ -62,7 +61,6 @@ resource "azurerm_postgresql_server" "srv-pgsql" {
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
-  # a mettre en key vault
   administrator_login          = data.azurerm_key_vault_secret.db-username.value
   administrator_login_password = data.azurerm_key_vault_secret.db-password.value
 
