@@ -41,7 +41,7 @@ resource "azurerm_linux_web_app" "webapp" {
 
   app_settings = {
     PORT                      = var.port
-    DB_HOST                   = var.db_host
+    DB_HOST                   = azurerm_postgresql_server.srv-pgsql.fqdn
     DB_USERNAME               = "${data.azurerm_key_vault_secret.db-username.value}@${azurerm_postgresql_server.srv-pgsql.name}"
     DB_PASSWORD               = data.azurerm_key_vault_secret.db-password.value
     DB_DATABASE               = var.db_database
@@ -77,4 +77,37 @@ resource "azurerm_postgresql_server" "srv-pgsql" {
   ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
 }
 
+resource "azurerm_postgresql_firewall_rule" "srv-pgsql" {
+  name                = "AllowAzureServices"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  server_name         = azurerm_postgresql_server.srv-pgsql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+}
 # PGAdmin à ajouter
+
+resource "azurerm_container_group" "pgadmin" {
+  name                = "aci-pgadmin-${var.project_name}${var.environment_suffix}"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  ip_address_type     = "Public"
+  dns_name_label      = "aci-pgadmin-${var.project_name}${var.environment_suffix}"
+  os_type             = "Linux"
+
+  container {
+    name   = "pgadmin"
+    image  = "dpage/pgadmin4:latest"
+    cpu    = "0.5"
+    memory = "1.5"
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+
+    environment_variables = {
+      "PGADMIN_DEFAULT_EMAIL"    = data.azurerm_key_vault_secret.pga-admin-email.value,
+      "PGADMIN_DEFAULT_PASSWORD" = data.azurerm_key_vault_secret.pga-password.value
+    }
+  }
+}

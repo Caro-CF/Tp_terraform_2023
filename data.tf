@@ -26,3 +26,13 @@ data "azurerm_key_vault_secret" "access-token-secret" {
   name         = "access-token-secret"
   key_vault_id = data.azurerm_key_vault.kv.id
 }
+
+data "azurerm_key_vault_secret" "pga-admin-email" {
+  name         = "pga-admin-email"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}
+
+data "azurerm_key_vault_secret" "pga-password" {
+  name         = "pga-password"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}
